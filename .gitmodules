@@ -1,0 +1,6 @@
+[submodule "gitops-kyverno"]
+	path = gitops-kyverno
+	url = https://github.com/skywno/gitops-kyverno
+[submodule "Crossplane-Argocd-and-localstack-for-local-environments"]
+	path = Crossplane-Argocd-and-localstack-for-local-environments
+	url = https://github.com/skywno/Crossplane-Argocd-and-localstack-for-local-environments.git

@@ -9,7 +9,7 @@ spec:
   source:
     repoURL: https://github.com/skywno/argocd-practice.git
     targetRevision: test-ksops  # For Helm, this refers to the chart version.
-    path: apps  # This has no meaning for Helm charts pulled directly from a Helm repo instead of git.
+    path: ksops/apps  # This has no meaning for Helm charts pulled directly from a Helm repo instead of git.
   destination:
     server: https://kubernetes.default.svc
     namespace: ksops

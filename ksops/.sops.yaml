@@ -1,0 +1,5 @@
+creation_rules:
+  - path_regex: .*
+    encrypted_regex: '^(data|stringData)$'
+    cleartext_regex: '^(kind|apiVersion|metadata|type)$'
+    pgp: E6D5C72EE4C281D2214DF2100CC466884A502662

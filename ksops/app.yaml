@@ -1,0 +1,12 @@
+kind: Application
+metadata:
+  name: ksops
+  namespace: ksops
+spec:
+  source:
+    repoURL: https://github.com/skywno/ksops.git
+    targetRevision: test-ksops
+    path: apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ksops

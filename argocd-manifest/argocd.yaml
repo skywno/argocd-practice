@@ -31256,6 +31256,8 @@ metadata:
     app.kubernetes.io/name: argocd-cm
     app.kubernetes.io/part-of: argocd
   name: argocd-cm
+data:
+  kustomize.buildOptions: "--enable-alpha-plugins --enable-exec"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -32332,6 +32334,8 @@ spec:
           value: /helm-working-dir
         - name: HELM_DATA_HOME
           value: /helm-working-dir
+        - name: GNUPGHOME
+          value: /app/config/sops/gpg
         image: quay.io/argoproj/argocd:v3.3.0
         imagePullPolicy: Always
         livenessProbe:
@@ -32378,6 +32382,14 @@ spec:
           name: helm-working-dir
         - mountPath: /home/argocd/cmp-server/plugins
           name: plugins
+        - mountPath: /usr/local/bin/kustomize
+          name: custom-tools
+          subPath: kustomize
+        - mountPath: /usr/local/bin/ksops
+          name: custom-tools
+          subPath: ksops
+        - mountPath: /app/config/sops/gpg
+          name: sops-gpg-keyring
       initContainers:
       - args:
         - /bin/cp --update=none /usr/local/bin/argocd /var/run/argocd/argocd && /bin/ln
@@ -32399,6 +32411,27 @@ spec:
         volumeMounts:
         - mountPath: /var/run/argocd
           name: var-files
+      - name: install-ksops
+        image: viaductoss/ksops:v4.3.3
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Installing KSOPS...";
+            mv ksops /custom-tools/;
+            mv kustomize /custom-tools/;
+            echo "Done.";
+        volumeMounts:
+        - mountPath: /custom-tools
+          name: custom-tools
+      - name: gpg-import-sops
+        image: quay.io/argoproj/argocd:v3.3.0
+        command: ["gpg", "--batch", "--homedir", "/sops-keyring", "--import", "/secret/private.asc"]
+        volumeMounts:
+        - mountPath: /sops-keyring
+          name: sops-gpg-keyring
+        - mountPath: /secret
+          name: sops-gpg-private-key
+          readOnly: true
       nodeSelector:
         kubernetes.io/os: linux
       serviceAccountName: argocd-repo-server
@@ -32433,6 +32466,13 @@ spec:
         name: var-files
       - emptyDir: {}
         name: plugins
+      - emptyDir: {}
+        name: custom-tools
+      - emptyDir: {}
+        name: sops-gpg-keyring
+      - name: sops-gpg-private-key
+        secret:
+          secretName: argocd-sops-gpg
 ---
 apiVersion: apps/v1
 kind: Deployment

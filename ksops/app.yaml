@@ -1,12 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: ksops
-  namespace: ksops
+  namespace: default
 spec:
+  # The project the application belongs to.
+  project: default
   source:
-    repoURL: https://github.com/skywno/ksops.git
-    targetRevision: test-ksops
-    path: apps
+    repoURL: https://github.com/skywno/argocd-practice.git
+    targetRevision: test-ksops  # For Helm, this refers to the chart version.
+    path: apps  # This has no meaning for Helm charts pulled directly from a Helm repo instead of git.
   destination:
     server: https://kubernetes.default.svc
     namespace: ksops
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

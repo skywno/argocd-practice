@@ -32336,6 +32336,8 @@ spec:
           value: /helm-working-dir
         - name: GNUPGHOME
           value: /app/config/sops/gpg
+        - name: XDG_CONFIG_HOME
+          value: /.config
         image: quay.io/argoproj/argocd:v3.3.0
         imagePullPolicy: Always
         livenessProbe:

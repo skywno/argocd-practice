@@ -3,4 +3,4 @@ kind: Kustomization
 
 generators:
   # Reference the ksops plugin configuration
-  - ksops-config.yaml
+  - ksops-secret-generator.yaml

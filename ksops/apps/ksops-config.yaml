@@ -1,7 +1,0 @@
-apiVersion: viaduct.ai/v1
-kind: ksops
-metadata:
-  name: ksops-config
-files:
-# List all SOPS-encrypted YAMLs that you want ksops to handle
-- db-secrets-encrypt.yaml

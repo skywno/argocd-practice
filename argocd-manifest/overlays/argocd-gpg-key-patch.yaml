@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-repo-server
+spec:
+  template:
+    spec:
+      # 1. Define an emptyDir volume which will hold the custom binaries
+      volumes:
+      - emptyDir: {}
+        name: sops-gpg-keyring
+      - name: sops-gpg-private-key
+        secret:
+          secretName: argocd-sops-gpg
+      # 2. Use an init container to download/copy custom binaries into the emptyDir
+      initContainers:
+      - name: gpg-import-sops
+        image: quay.io/argoproj/argocd:v3.3.0
+        command: ["gpg", "--batch", "--homedir", "/sops-keyring", "--import", "/secret/private.asc"]
+        volumeMounts:
+        - mountPath: /sops-keyring
+          name: sops-gpg-keyring
+        - mountPath: /secret
+          name: sops-gpg-private-key
+          readOnly: true              
+      # 3. Volume mount the custom binary to the bin directory (overriding the existing version)
+      containers:
+      - name: argocd-repo-server
+        volumeMounts:
+        - mountPath: /app/config/sops/gpg
+          name: sops-gpg-keyring
+        env:
+        - name: GNUPGHOME
+          value: /app/config/sops/gpg
+        - name: XDG_CONFIG_HOME
+          value: /.config

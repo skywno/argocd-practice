@@ -1,0 +1,18 @@
+namespace: argocd
+
+resources:
+  - ../base/
+
+patches:
+  - path: argocd-cm-patch.yaml
+    target:
+      kind: ConfigMap
+      name: argocd-cm
+  - path: argocd-gpg-key-patch.yaml
+    target:
+      kind: Deployment
+      name: argocd-repo-server
+  - path: argocd-server-ksops-patch.yaml
+    target:
+      kind: Deployment
+      name: argocd-repo-server

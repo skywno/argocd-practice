@@ -10,9 +10,11 @@ metadata:
 spec:
   project: idp-control-plane
   source:
-    repoURL: https://github.com/skywno/argocd-practice.git
-    targetRevision: HEAD
-    path: crossplane-argocd-opa/opa/core
+    repoURL: https://open-policy-agent.github.io/gatekeeper/charts
+    chart: gatekeeper
+    targetRevision: 3.22.0
+    helm:
+      releaseName: gatekeeper
   destination:
     server: https://kubernetes.default.svc
     namespace: gatekeeper-system

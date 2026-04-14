@@ -1,3 +1,5 @@
 private.asc
 public.key
 db-secrets.yaml
+./crossplane/managed_resources/aws-credentials.ini
+aws-credentials.ini

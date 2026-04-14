@@ -6,7 +6,7 @@ metadata:
 spec:
   description: Backend-first IDP control plane applications
   sourceRepos:
-    - https://github.com/example-org/argocd-practice.git
+    - https://github.com/skywno/argocd-practice.git
     - https://charts.crossplane.io/stable
     - https://open-policy-agent.github.io/gatekeeper/charts
   destinations:

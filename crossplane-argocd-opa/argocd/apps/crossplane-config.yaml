@@ -10,7 +10,7 @@ metadata:
 spec:
   project: idp-control-plane
   source:
-    repoURL: https://github.com/example-org/argocd-practice.git
+    repoURL: https://github.com/skywno/argocd-practice.git
     targetRevision: HEAD
     path: crossplane-argocd-opa/crossplane/config
   destination:

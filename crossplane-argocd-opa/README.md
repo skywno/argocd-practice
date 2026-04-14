@@ -14,6 +14,7 @@ No frontend portal (such as Backstage) is required for this sample.
 - `argocd/bootstrap`: Argo CD installation and root app bootstrap
 - `argocd/apps`: app-of-apps children with sync-wave ordering
 - `crossplane/config`: providers, `ProviderConfig`, XRD, and Composition
+- `opa/core`: Gatekeeper core install (`v3.22.1` upstream release manifest)
 - `opa/policies`: Gatekeeper constraint templates and constraints
 - `platform`: sample tenant, claim, and policy test workloads
 
@@ -36,20 +37,15 @@ microk8s config > ~/.kube/config
 1. Update repository URL placeholders in:
    - `argocd/bootstrap/root-app.yaml`
    - `argocd/apps/project.yaml`
+   - `argocd/apps/opa-core.yaml`
    - `argocd/apps/crossplane-config.yaml`
    - `argocd/apps/opa-policies.yaml`
    - `argocd/apps/platform.yaml`
-2. Install Argo CD:
+2. Install Argo CD and bootstrap root-app:
 
 ```bash
-kubectl apply -k crossplane-argocd-opa/argocd/bootstrap
+kubectl apply -n argocd --server-side --force-conflicts -k argocd/bootstrap
 kubectl -n argocd rollout status deploy/argocd-server --timeout=5m
-```
-
-3. Bootstrap app-of-apps:
-
-```bash
-kubectl apply -f crossplane-argocd-opa/argocd/bootstrap/root-app.yaml
 ```
 
 ## Validation checks
@@ -82,6 +78,15 @@ kubectl get constrainttemplates
 kubectl get k8srequiredlabels,k8sdisallowlatest,k8srequiredresources,k8sdisallowprivileged
 kubectl apply -f crossplane-argocd-opa/platform/policy-test-valid-deployment.yaml
 kubectl apply -f crossplane-argocd-opa/platform/policy-test-invalid-latest.yaml
+```
+
+If custom constraint kinds are missing, wait for templates first:
+
+```bash
+kubectl wait --for=condition=Created constrainttemplates.templates.gatekeeper.sh/k8srequiredlabels --timeout=120s
+kubectl wait --for=condition=Created constrainttemplates.templates.gatekeeper.sh/k8sdisallowlatest --timeout=120s
+kubectl wait --for=condition=Created constrainttemplates.templates.gatekeeper.sh/k8srequiredresources --timeout=120s
+kubectl wait --for=condition=Created constrainttemplates.templates.gatekeeper.sh/k8sdisallowprivileged --timeout=120s
 ```
 
 Expected behavior:

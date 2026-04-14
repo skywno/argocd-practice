@@ -1,0 +1,105 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: xservice.microk8s.platform.example.org
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  compositeTypeRef:
+    apiVersion: platform.example.org/v1alpha1
+    kind: XService
+  resources:
+    - name: workload-namespace
+      base:
+        apiVersion: kubernetes.crossplane.io/v1alpha2
+        kind: Object
+        spec:
+          providerConfigRef:
+            name: in-cluster
+          forProvider:
+            manifest:
+              apiVersion: v1
+              kind: Namespace
+              metadata:
+                name: placeholder
+                labels:
+                  platform.example.org/managed: "true"
+                  platform.example.org/enforced: "true"
+      patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.namespace
+          toFieldPath: spec.forProvider.manifest.metadata.name
+    - name: workload-deployment
+      base:
+        apiVersion: kubernetes.crossplane.io/v1alpha2
+        kind: Object
+        spec:
+          providerConfigRef:
+            name: in-cluster
+          forProvider:
+            manifest:
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: service-workload
+                namespace: placeholder
+                labels:
+                  app.kubernetes.io/name: service-workload
+              spec:
+                replicas: 1
+                selector:
+                  matchLabels:
+                    app.kubernetes.io/name: service-workload
+                template:
+                  metadata:
+                    labels:
+                      app.kubernetes.io/name: service-workload
+                  spec:
+                    containers:
+                      - name: app
+                        image: nginx:1.27.1
+                        ports:
+                          - containerPort: 80
+                        resources:
+                          requests:
+                            cpu: 100m
+                            memory: 128Mi
+                          limits:
+                            cpu: 500m
+                            memory: 512Mi
+      patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.namespace
+          toFieldPath: spec.forProvider.manifest.metadata.namespace
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.replicas
+          toFieldPath: spec.forProvider.manifest.spec.replicas
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.image
+          toFieldPath: spec.forProvider.manifest.spec.template.spec.containers[0].image
+    - name: workload-service
+      base:
+        apiVersion: kubernetes.crossplane.io/v1alpha2
+        kind: Object
+        spec:
+          providerConfigRef:
+            name: in-cluster
+          forProvider:
+            manifest:
+              apiVersion: v1
+              kind: Service
+              metadata:
+                name: service-workload
+                namespace: placeholder
+              spec:
+                selector:
+                  app.kubernetes.io/name: service-workload
+                ports:
+                  - name: http
+                    port: 80
+                    targetPort: 80
+                type: ClusterIP
+      patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.namespace
+          toFieldPath: spec.forProvider.manifest.metadata.namespace

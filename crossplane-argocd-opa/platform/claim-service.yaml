@@ -1,0 +1,10 @@
+apiVersion: platform.example.org/v1alpha1
+kind: Service
+metadata:
+  name: tenant-a-service
+  namespace: tenant-a
+spec:
+  parameters:
+    namespace: tenant-a-workload
+    image: nginx:1.27.1
+    replicas: 2

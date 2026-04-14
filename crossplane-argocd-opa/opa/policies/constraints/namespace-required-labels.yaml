@@ -1,0 +1,22 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRequiredLabels
+metadata:
+  name: namespace-required-labels
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Namespace"]
+    excludedNamespaces:
+      - kube-system
+      - kube-public
+      - kube-node-lease
+      - argocd
+      - crossplane-system
+      - gatekeeper-system
+      - ingress
+      - container-registry
+  parameters:
+    labels:
+      - owner
+      - environment

@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/example-org/argocd-practice.git
+    repoURL: https://github.com/skywno/argocd-practice.git
     targetRevision: HEAD
     path: crossplane-argocd-opa/argocd/apps
   destination:

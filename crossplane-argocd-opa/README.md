@@ -44,10 +44,11 @@ microk8s config > ~/.kube/config
 2. Install Argo CD and bootstrap root-app:
 
 ```bash
-kubectl create ns aragocd
+kubectl create ns argocd
 kubectl apply -n argocd --server-side --force-conflicts -k argocd/bootstrap
-kubectl -n argocd rollout status deploy/argocd-server --timeout=5m
-kubectl apply -f argocd/boostrap/rootapp.yaml
+
+kubectl apply -f argocd/boostrap/root-app.yaml
+kubectl apply -f argocd/boostrap/root-project.yaml
 ```
 
 ## Validation checks

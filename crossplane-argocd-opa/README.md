@@ -56,10 +56,13 @@ kubectl apply -f argocd/bootstrap/root-app.yaml
 Delete workloads first, then remove the `AppProject`:
 
 ```bash
-argocd app delete idp-root --cascade --yes
+
+k delete -f argocd/bootstrap/root-app.yaml -n argocd
 kubectl wait application/idp-root -n argocd --for=delete --timeout=300s
 
 kubectl delete -f argocd/bootstrap/root-project.yaml
+k delete -k ./crossplane-argocd-opa/argocd/bootstrap/ -n argocd
+
 ```
 
 Why this ordering matters:

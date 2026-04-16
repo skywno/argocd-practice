@@ -13,8 +13,9 @@ No frontend portal (such as Backstage) is required for this sample.
 
 - `argocd/bootstrap`: Argo CD installation and root app bootstrap
 - `argocd/apps`: app-of-apps children with sync-wave ordering
+- `argocd/bootstrap/root-project.yaml`: dedicated `AppProject` (`idp-control-plane`) managed separately from app-of-apps
 - `crossplane/config`: providers, `ProviderConfig`, XRD, and Composition
-- `opa/core`: Gatekeeper core install (`v3.22.1` upstream release manifest)
+- `opa/core`: reserved for Gatekeeper core manifests (current deployment uses Helm via `argocd/apps/opa-core.yaml`)
 - `opa/policies`: Gatekeeper constraint templates and constraints
 - `platform`: sample tenant, claim, and policy test workloads
 
@@ -36,7 +37,6 @@ microk8s config > ~/.kube/config
 
 1. Update repository URL placeholders in:
    - `argocd/bootstrap/root-app.yaml`
-   - `argocd/apps/project.yaml`
    - `argocd/apps/opa-core.yaml`
    - `argocd/apps/crossplane-config.yaml`
    - `argocd/apps/opa-policies.yaml`
@@ -47,9 +47,34 @@ microk8s config > ~/.kube/config
 kubectl create ns argocd
 kubectl apply -n argocd --server-side --force-conflicts -k argocd/bootstrap
 
-kubectl apply -f argocd/boostrap/root-app.yaml
-kubectl apply -f argocd/boostrap/root-project.yaml
+kubectl apply -f argocd/bootstrap/root-project.yaml
+kubectl apply -f argocd/bootstrap/root-app.yaml
 ```
+
+## Safe teardown sequence
+
+Delete workloads first, then remove the `AppProject`:
+
+```bash
+argocd app delete idp-root --cascade --yes
+kubectl wait application/idp-root -n argocd --for=delete --timeout=300s
+
+kubectl delete -f argocd/bootstrap/root-project.yaml
+```
+
+Why this ordering matters:
+
+- Child apps (`crossplane-core`, `opa-gatekeeper-core`, etc.) use `spec.project: idp-control-plane`.
+- If the `AppProject` is deleted first, Argo CD cannot finish child app finalization and deletion may get stuck.
+
+Recovery when deletion is already stuck:
+
+```bash
+kubectl apply -f argocd/bootstrap/root-project.yaml
+argocd app delete idp-root --cascade --yes
+```
+
+
 
 ## Validation checks
 
@@ -67,11 +92,10 @@ argocd app get idp-platform-sample
 Crossplane API readiness:
 
 ```bash
-kubectl get xrd apps.example.crossplane.io 
-kubectl get composition xservice.microk8s.platform.example.org
+kubectl get xrd myapps.example.crossplane.io
+kubectl get composition app-yaml
 kubectl get providers.pkg.crossplane.io
-kubectl get services.platform.example.org -A
-kubectl get xservices.platform.example.org
+kubectl get myapps.example.crossplane.io -A
 ```
 
 Gatekeeper and policy checks:

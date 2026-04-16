@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - tenant-a-namespace.yaml
   - claim-myapp.yaml
+  - claim-invalid-myapp.yaml

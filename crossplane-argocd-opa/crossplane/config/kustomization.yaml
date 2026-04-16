@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - functions/patch-and-transform.yaml
   - apis/myapps/xrd.yaml
+  - apis/myapps/composition.yaml

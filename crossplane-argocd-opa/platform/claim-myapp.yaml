@@ -1,0 +1,7 @@
+apiVersion: example.crossplane.io/v1
+kind: MyApp
+metadata:
+  name: tenant-amy-app
+  namespace: tenant-a
+spec:
+  image: nginx:1.27.1

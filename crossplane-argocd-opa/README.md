@@ -44,8 +44,10 @@ microk8s config > ~/.kube/config
 2. Install Argo CD and bootstrap root-app:
 
 ```bash
+kubectl create ns aragocd
 kubectl apply -n argocd --server-side --force-conflicts -k argocd/bootstrap
 kubectl -n argocd rollout status deploy/argocd-server --timeout=5m
+kubectl apply -f argocd/boostrap/rootapp.yaml
 ```
 
 ## Validation checks
@@ -64,7 +66,7 @@ argocd app get idp-platform-sample
 Crossplane API readiness:
 
 ```bash
-kubectl get xrd xservices.platform.example.org
+kubectl get xrd apps.example.crossplane.io 
 kubectl get composition xservice.microk8s.platform.example.org
 kubectl get providers.pkg.crossplane.io
 kubectl get services.platform.example.org -A
